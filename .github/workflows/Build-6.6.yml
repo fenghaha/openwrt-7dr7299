@@ -80,6 +80,8 @@ jobs:
               return 1
             fi
           }
+          require_config 'CONFIG_PACKAGE_blkid=y'
+          require_config 'CONFIG_PACKAGE_kmod-mt_wifi7=y'
           require_config 'CONFIG_MTK_WIFI7_FIRST_IF_IPAILNA=y'
           require_config '# CONFIG_MTK_WIFI7_FIRST_IF_EPAELNA is not set'
           require_config 'CONFIG_MTK_WIFI7_SECOND_IF_EPAELNA=y'
