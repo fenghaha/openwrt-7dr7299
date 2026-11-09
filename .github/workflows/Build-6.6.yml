@@ -13,14 +13,14 @@ permissions:
   contents: write
 
 concurrency:
-  group: tl-7dr7299-firmware
+  group: tl-7dr7299-firmware-${{ github.ref }}
   cancel-in-progress: false
 
 env:
   REPO_URL: https://github.com/padavanonly/immortalwrt-mt798x-6.6.git
   REPO_BRANCH: mt798x-mt799x-6.6-mtwifi
-  # Exact source revision used by the known-good Enshan image (r1-6b7374feb).
-  SOURCE_COMMIT: 6b7374feb2c7e4b0a9486333578f2b8950008840
+  # Pin the closed-source Wi-Fi branch HEAD selected for this build.
+  SOURCE_COMMIT: 30fbc1d6deba23c0e850185021e9ee42214925eb
   TZ: Asia/Shanghai
 
 jobs:
@@ -87,7 +87,7 @@ jobs:
           require_config 'CONFIG_PACKAGE_kmod-tun=y'
           require_config 'CONFIG_PACKAGE_luci-app-statistics=y'
           require_config 'CONFIG_PACKAGE_luci-i18n-statistics-zh-cn=y'
-          if grep -E '^CONFIG_PACKAGE_(tailscale|block-mount|autosamba|luci-app-samba4|samba4-server|kmod-usb3|kmod-usb-storage(-[^=]+)?)=[ym]$' .config; then
+          if grep -E '^CONFIG_PACKAGE_(tailscale|automount|block-mount|autosamba|luci-app-samba4|samba4-server|kmod-usb3|kmod-usb-storage(-[^=]+)?)=[ym]$' .config; then
             echo 'Unexpected Tailscale, Samba, or USB storage package' >&2
             exit 1
           fi
@@ -98,7 +98,7 @@ jobs:
         with:
           ccache: true
           toolchain: true
-          mixkey: tl-7dr7299-mtwifi-6.6
+          mixkey: tl-7dr7299-mtwifi-6.6-${{ env.SOURCE_COMMIT }}
           prefix: ${{ env.OPENWRT_PATH }}
 
       - name: Download sources
@@ -135,7 +135,7 @@ jobs:
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: tl-7dr7299-${{ env.BUILD_DATE }}
+          tag_name: tl-7dr7299-${{ env.BUILD_DATE }}-30fbc1d
           name: TL-7DR7299 closed-source Wi-Fi ${{ env.BUILD_DATE }}
           generate_release_notes: false
           body: |
@@ -143,7 +143,7 @@ jobs:
 
             - Source: padavanonly/immortalwrt-mt798x-6.6
             - Branch: mt798x-mt799x-6.6-mtwifi
-            - Source revision: 6b7374feb (matched to the known-good Enshan image)
+            - Source revision: ${{ env.SOURCE_COMMIT }}
             - RF front end: first radio iPA/iLNA, second radio ePA/eLNA
             - Wi-Fi: MediaTek proprietary MT7992 driver
             - LAN address: 192.168.6.1
